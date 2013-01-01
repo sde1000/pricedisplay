@@ -15,7 +15,8 @@ opts=None
 def fetch_location(loc):
     cur=con.cursor()
     cur.execute("SELECT sl.name,si.manufacturer,si.name,si.abv,"
-                "si.saleprice,si.unit,si.used/si.size AS remaining "
+                "si.saleprice,si.unit,"
+                "(si.size-COALESCE(si.used,0.0))/si.size AS remaining "
                 "FROM stocklines sl "
                 "JOIN stockonsale sos ON sos.stocklineid=sl.stocklineid "
                 "JOIN stockinfo si ON si.stockid=sos.stockid "
