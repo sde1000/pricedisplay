@@ -4,10 +4,9 @@
 from __future__ import unicode_literals, division, print_function
 
 import pygame
+import requests
 from argparse import ArgumentParser
 import sys
-from quicktill.models import *
-from quicktill import td
 
 size = (1920 // 2, 1080 // 2)
 
@@ -15,35 +14,15 @@ fonts = {} # Cache of font objects indexed by size
 args = None
 
 def fetch_location(loc):
-    lines = td.s.query(StockLine).filter(StockLine.location == loc).\
-        order_by(StockLine.name).all()
+    lines = requests.get("{}location/{}.json".format(args.address, loc)).json()
     l = []
-    for sl in lines:
-        if sl.linetype != "regular":
-            continue
-        if not sl.stockonsale:
-            continue
-        si = sl.stockonsale[0]
-        # Colour is white for remaining>0.5
-        # Blue fades out for remaining between 0.25 and 0.5
-        # Green fades out for remaining between 0 and 0.25
-        remaining = float(si.used / si.stockunit.size)
-        red = 255
-        if remaining > 0.25:
-            green = 255
-        else:
-            green = 255 * (remaining * 4)
-        if remaining > 0.5:
-            blue = 255
-        elif remaining > 0.25:
-            blue = 255 * ((remaining - 0.25) * 4)
-        else:
-            blue = 0
-        l.append(((red, green, blue), sl.name,"{} {} {}".format(
-                    si.stocktype.manufacturer,
-                    si.stocktype.name,
-                    si.stocktype.abvstr),
-                  "£{}".format(si.stocktype.pricestr)))
+    for sl in lines["location"]:
+        unit = sl["unit"] if sl["price_for_units"] == "1.0" else "{} {}s".format(
+            sl["price_for_units"], sl["unit"])
+        if unit == "750.0 mls":
+            unit = "bottle"
+        l.append(((0xff, 0xff, 0xff), sl["line"], sl["description"],
+                  "£{}/{}".format(sl["price"], unit)))
     return l
 
 def maxwidth(font, lines):
@@ -58,8 +37,7 @@ def getfont(size):
     return fonts[size]
 
 def repaint(d):
-    with td.orm_session():
-        lines = fetch_location(args.location)
+    lines = fetch_location(args.location)
     fontsize = d.get_height() // len(lines)
     lineheight = fontsize
     widths = [width + 1]
@@ -96,13 +74,12 @@ if __name__ == "__main__":
        help="list available fonts and exit")
     aa("-l", "--location", dest="location", default="Bar",
        help="stock line location to display")
-    aa("database", help="database connection string")
+    aa("address", help="web server base address")
     args = parser.parse_args()
     if args.listfonts:
         pygame.font.init()
         print(" ".join(pygame.font.get_fonts()))
         sys.exit(0)
-    td.init(args.database)
     
     pygame.init()
     if args.fullscreen:
