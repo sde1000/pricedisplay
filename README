@@ -1,7 +1,0 @@
-A little script to display a list of beer prices full-screen using pygame.
-
-The beers on sale and their prices are fetched from a database; the
-assumption is that the EPOS system will keep this database up-to-date.
-
-Runs quite handily on Raspberry Pi if you install the python-psycopg2
-package.
