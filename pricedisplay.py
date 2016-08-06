@@ -14,16 +14,19 @@ fonts = {} # Cache of font objects indexed by size
 args = None
 
 def fetch_location(loc):
-    lines = requests.get("{}location/{}.json".format(args.address, loc)).json()
-    l = []
-    for sl in lines["location"]:
-        unit = sl["unit"] if sl["price_for_units"] == "1.0" else "{} {}s".format(
-            sl["price_for_units"], sl["unit"])
-        if unit == "750.0 mls":
-            unit = "bottle"
-        l.append(((0xff, 0xff, 0xff), sl["line"], sl["description"],
-                  "£{}/{}".format(sl["price"], unit)))
-    return l
+    try:
+        lines = requests.get("{}location/{}.json".format(args.address, loc)).json()
+        l = []
+        for sl in lines["location"]:
+            unit = sl["unit"] if sl["price_for_units"] == "1.0" else "{} {}s".format(
+                sl["price_for_units"], sl["unit"])
+            if unit == "750.0 mls":
+                unit = "bottle"
+            l.append(((0xff, 0xff, 0xff), sl["line"], sl["description"],
+                      "£{}/{}".format(sl["price"], unit)))
+            return l
+    except:
+        return None
 
 def maxwidth(font, lines):
     widths = [font.size(l)[0] for l in lines]
@@ -38,6 +41,13 @@ def getfont(size):
 
 def repaint(d):
     lines = fetch_location(args.location)
+    if lines is None:
+        print("Error...")
+        f = getfont(50)
+        s = f.render("Network error - not up to date", True, (255, 0, 0))
+        d.blit(s, (0, 0))
+        pygame.display.update()
+        return
     fontsize = d.get_height() // len(lines)
     lineheight = fontsize
     widths = [width + 1]
