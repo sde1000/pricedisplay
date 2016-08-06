@@ -24,7 +24,7 @@ def fetch_location(loc):
                 unit = "bottle"
             l.append(((0xff, 0xff, 0xff), sl["line"], sl["description"],
                       "£{}/{}".format(sl["price"], unit)))
-            return l
+        return l
     except:
         return None
 
