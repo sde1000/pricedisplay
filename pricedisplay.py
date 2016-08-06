@@ -40,14 +40,14 @@ def getfont(size):
     return fonts[size]
 
 def repaint(d):
-    lines = fetch_location(args.location)
-    if lines is None:
-        print("Error...")
-        f = getfont(50)
-        s = f.render("Network error - not up to date", True, (255, 0, 0))
-        d.blit(s, (0, 0))
-        pygame.display.update()
-        return
+    lines = None
+    while lines is None:
+        lines = fetch_location(args.location)
+        if lines is None:
+            f = getfont(50)
+            s = f.render("Network error - not up to date", True, (255, 0, 0))
+            d.blit(s, (0, 0))
+            pygame.display.update()
     fontsize = d.get_height() // len(lines)
     lineheight = fontsize
     widths = [width + 1]
