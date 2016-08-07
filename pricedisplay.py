@@ -48,8 +48,8 @@ def repaint(d):
             s = f.render("Network error - not up to date", True, (255, 0, 0))
             d.blit(s, (0, 0))
             pygame.display.update()
-    lines.insert(0, ((0xff,0xff,0x00),"","We need more volunteers today!",""))
-    lines.append(((0x00,0xff,0x00),"","Please go to volunteer.emfcamp.org",""))
+    #lines.insert(0, ((0xff,0xff,0x00),"","We need more volunteers today!",""))
+    #lines.append(((0x00,0xff,0x00),"","Please go to volunteer.emfcamp.org",""))
     fontsize = d.get_height() // len(lines)
     lineheight = fontsize
     widths = [width + 1]
